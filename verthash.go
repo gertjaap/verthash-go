@@ -21,6 +21,28 @@ const VerthashRotations uint32 = 32
 const VerthashIndexes uint32 = 4096
 const VerthashByteAlignment uint32 = 16
 
+func EnsureVerthashDatafile(file string) error {
+	if _, err := os.Stat(file); os.IsNotExist(err) {
+		MakeVerthashDatafile(file)
+	}
+
+	ok, err := VerifyVerthashDatafile(file)
+	if err != nil || !ok {
+		os.Remove(file)
+		MakeVerthashDatafile(file)
+		ok, err := VerifyVerthashDatafile(file)
+		if err != nil {
+			return err
+		}
+		if !ok {
+			return fmt.Errorf("Could not crate or verify Verthash file")
+		}
+	}
+
+	return nil
+
+}
+
 func MakeVerthashDatafile(file string) error {
 	pk := sha3.Sum256([]byte("Verthash Proof-of-Space Datafile"))
 	NewGraph(17, file, pk[:])

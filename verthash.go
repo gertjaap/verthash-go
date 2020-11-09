@@ -2,7 +2,10 @@ package verthash
 
 import (
 	"bytes"
+	"crypto/sha256"
 	"encoding/binary"
+	"encoding/hex"
+	"fmt"
 	"io/ioutil"
 	"os"
 
@@ -23,6 +26,19 @@ func MakeVerthashDatafile(file string) error {
 	NewGraph(17, file, pk[:])
 
 	return nil
+}
+
+func VerifyVerthashDatafile(file string) (bool, error) {
+	b, err := ioutil.ReadFile(file)
+	if err != nil {
+		return false, err
+	}
+	hash := sha256.Sum256(b)
+	expectedHash, _ := hex.DecodeString("a55531e843cd56b010114aaf6325b0d529ecf88f8ad47639b6ededafd721aa48")
+	if !bytes.Equal(hash[:], expectedHash) {
+		return false, fmt.Errorf("Generated file has wrong hash: %x vs %x", hash, expectedHash)
+	}
+	return true, nil
 }
 
 type Verthash struct {

@@ -2,10 +2,8 @@ package verthash
 
 import (
 	"bytes"
-	"crypto/sha256"
 	"encoding/hex"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"testing"
 )
@@ -25,14 +23,9 @@ func TestMain(m *testing.M) {
 }
 
 func TestCreation(t *testing.T) {
-	b, err := ioutil.ReadFile("/tmp/verthash_verthash_go_testsuite.dat")
-	if err != nil {
+	ok, err := VerifyVerthashDatafile("/tmp/verthash_verthash_go_testsuite.dat")
+	if err != nil || !ok {
 		t.Error(err)
-	}
-	hash := sha256.Sum256(b)
-	expectedHash, _ := hex.DecodeString("a55531e843cd56b010114aaf6325b0d529ecf88f8ad47639b6ededafd721aa48")
-	if !bytes.Equal(hash[:], expectedHash) {
-		t.Errorf("Generated file has wrong hash: %x vs %x", hash, expectedHash)
 	}
 }
 

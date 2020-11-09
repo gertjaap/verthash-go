@@ -22,10 +22,7 @@ const VerthashIndexes uint32 = 4096
 const VerthashByteAlignment uint32 = 16
 
 func EnsureVerthashDatafile(file string) error {
-	if _, err := os.Stat(file); os.IsNotExist(err) {
-		MakeVerthashDatafile(file)
-	}
-
+	MakeVerthashDatafileIfNotExists(file)
 	ok, err := VerifyVerthashDatafile(file)
 	if err != nil || !ok {
 		os.Remove(file)
@@ -41,6 +38,13 @@ func EnsureVerthashDatafile(file string) error {
 
 	return nil
 
+}
+
+func MakeVerthashDatafileIfNotExists(file string) error {
+	if _, err := os.Stat(file); os.IsNotExist(err) {
+		return MakeVerthashDatafile(file)
+	}
+	return nil
 }
 
 func MakeVerthashDatafile(file string) error {

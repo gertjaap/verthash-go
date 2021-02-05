@@ -2,6 +2,7 @@ package verthash
 
 import (
 	"encoding/binary"
+	"time"
 
 	//"fmt"
 
@@ -49,7 +50,7 @@ func Log2(x int64) int64 {
 // Generate a new PoS graph of index
 // Currently only supports the weaker PoS graph
 // Note that this graph will have O(2^index) nodes
-func NewGraph(index int64, fn string, pk []byte) *Graph {
+func NewGraph(index int64, fn string, pk []byte, progress chan float64) *Graph {
 
 	var db *os.File
 	_, err := os.Stat(fn)
@@ -80,8 +81,31 @@ func NewGraph(index int64, fn string, pk []byte) *Graph {
 		pow2:  pow2,
 	}
 
+	done := make(chan bool, 1)
 	if !fileExists {
-		g.XiGraphIter(index)
+		go func() {
+			g.XiGraphIter(index)
+			done <- true
+		}()
+
+		for {
+			genDone := false
+			select {
+			case genDone = <-done:
+			case <-time.After(1 * time.Second):
+			}
+
+			if genDone {
+				break
+			}
+			if progress != nil {
+				s, err := g.db.Stat()
+				if err == nil {
+					progress <- float64(s.Size()) / float64(1283457024)
+				}
+			}
+		}
+
 	}
 
 	return g

@@ -22,11 +22,15 @@ const VerthashIndexes uint32 = 4096
 const VerthashByteAlignment uint32 = 16
 
 func EnsureVerthashDatafile(file string) error {
-	MakeVerthashDatafileIfNotExists(file)
+	return EnsureVerthashDatafileWithProgress(file, nil)
+}
+
+func EnsureVerthashDatafileWithProgress(file string, progress chan float64) error {
+	MakeVerthashDatafileIfNotExistsWithProgress(file, progress)
 	ok, err := VerifyVerthashDatafile(file)
 	if err != nil || !ok {
 		os.Remove(file)
-		MakeVerthashDatafile(file)
+		MakeVerthashDatafileWithProgress(file, progress)
 		ok, err := VerifyVerthashDatafile(file)
 		if err != nil {
 			return err
@@ -41,15 +45,24 @@ func EnsureVerthashDatafile(file string) error {
 }
 
 func MakeVerthashDatafileIfNotExists(file string) error {
+	return MakeVerthashDatafileIfNotExistsWithProgress(file, nil)
+}
+
+func MakeVerthashDatafileIfNotExistsWithProgress(file string, progress chan float64) error {
 	if _, err := os.Stat(file); os.IsNotExist(err) {
-		return MakeVerthashDatafile(file)
+		return MakeVerthashDatafileWithProgress(file, progress)
 	}
 	return nil
 }
 
 func MakeVerthashDatafile(file string) error {
+	return MakeVerthashDatafileWithProgress(file, nil)
+}
+
+func MakeVerthashDatafileWithProgress(file string, progress chan float64) error {
 	pk := sha3.Sum256([]byte("Verthash Proof-of-Space Datafile"))
-	NewGraph(17, file, pk[:])
+
+	NewGraph(17, file, pk[:], progress)
 
 	return nil
 }

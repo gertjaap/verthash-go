@@ -1,3 +1,6 @@
+// Derived from pos/graph.go in https://github.com/kwonalbert/spacemint
+// (MIT License, Copyright (c) 2026 Albert Kwon). See LICENSE.
+
 package verthash
 
 import (
